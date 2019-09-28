@@ -1,27 +1,38 @@
-import org.meiskalt7.gradle.version.VersionPlugin
-
-rootProject.group = 'org.meiskalt7.gradle'
-rootProject.wrapper.gradleVersion = '4.6'
-version = file('version.txt').exists() ? file('version.txt').text.trim() : "0.0.0"
-
 buildscript {
-    ext {
-        servicePackage = 'org.meiskalt7.gradle'
-        servicePackageSlashes = servicePackage.replace('.', '/')
-
-        ver = [
-                dependencyManagement: '1.0.8.RELEASE',
-                sonarqube           : '2.6.2',
-        ]
-    }
-
     repositories {
         mavenCentral()
     }
+}
 
-    dependencies {
-        classpath "io.spring.gradle:dependency-management-plugin:$ver.dependencyManagement",
-                "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:$ver.sonarqube"
+plugins {
+    id "com.gradle.plugin-publish" version "0.10.1"
+    id "java-gradle-plugin"
+    id 'org.sonarqube' version "2.6.2"
+}
+
+group = 'org.meiskalt7.gradle'
+version = file('version.txt').exists() ? file('version.txt').text.trim() : "0.0.0"
+
+// Use java-gradle-plugin to generate plugin descriptors and specify plugin ids
+gradlePlugin {
+    plugins {
+        versionPlugin {
+            id = 'org.meiskalt7.gradle.version'
+            implementationClass = 'org.meiskalt7.gradle.version.VersionPlugin'
+        }
+    }
+}
+
+pluginBundle {
+    website = 'https://github.com/meiskalt7/simple-gradle-versioning-plugin'
+    vcsUrl = 'https://github.com/meiskalt7/simple-gradle-versioning-plugin.git'
+    description = 'Simple git versioning plugin for gradle'
+    tags = ['git', 'versioning', 'version', 'semantic-versioning', 'auto-versioning', 'semver', 'release', 'changelog']
+
+    plugins {
+        versionPlugin {
+            displayName = 'Simple gradle plugin for versioning based on git commit history'
+        }
     }
 }
 
@@ -39,19 +50,14 @@ allprojects {
     apply plugin: 'jacoco'
 }
 
-apply plugin: 'org.sonarqube'
-
 subprojects {
-
     apply plugin: 'groovy'
     apply plugin: 'maven'
     apply plugin: 'maven-publish'
-    apply plugin: 'io.spring.dependency-management'
-    apply plugin: VersionPlugin
+    apply plugin: org.meiskalt7.gradle.version.VersionPlugin
 
-    sourceCompatibility = '1.8'
-    targetCompatibility = '1.8'
-
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
 }
 
 project(':buildSrc') {
@@ -73,26 +79,6 @@ project(':buildSrc') {
         doLast {
             options.encoding = defaultEncoding
             options.compilerArgs = ['-parameters', '-Xlint:unchecked']
-        }
-    }
-
-    compileTestGroovy {
-        options.encoding = defaultEncoding
-        options.compilerArgs = ['-parameters', '-Xlint:unchecked']
-    }
-
-    publishing {
-        repositories {
-            mavenCentral()
-        }
-
-        publications {
-
-            mavenGroovy(MavenPublication) {
-                groupId project.group
-                artifactId rootProject.name
-                from components.java
-            }
         }
     }
 
