@@ -47,28 +47,19 @@ class VersionProcessor implements Processor {
             resetKeywords = []
         }
 
-        Boolean isFoundLastMajorKeyword = false
         List<String> linesFromLast = []
         outerloop:
         for (String line : result.log) {
             for (String keyword : resetKeywords) {
                 if (line =~ /(?i)(\[${keyword}\]|\(${keyword}\))/) {
-                    isFoundLastMajorKeyword = true
                     break outerloop
                 }
-                linesFromLast.add(line)
             }
-        }
-
-        if (!isFoundLastMajorKeyword) {
-            return 0
+            linesFromLast.add(line)
         }
 
         Integer idx = 0
         for (String line : linesFromLast) {
-            if (!isFoundLastMajorKeyword) {
-                continue
-            }
             for (String keyword : featureKeywords) {
                 if (line =~ /(?i)(\[${keyword}\]|\(${keyword}\))/) {
                     idx++
@@ -88,39 +79,22 @@ class VersionProcessor implements Processor {
             return '0'
         }
 
-        Boolean isFoundLastMajorKeyword = false
         List<String> linesFromLast = []
         outerloop:
         for (String line : result.log) {
             for (String keyword : keywords) {
                 if (line =~ /(?i)(\[${keyword}\]|\(${keyword}\))/) {
-                    isFoundLastMajorKeyword = true
                     break outerloop
                 }
-                linesFromLast.add(line)
             }
-        }
-
-        if (!isFoundLastMajorKeyword) {
-            return 0
+            linesFromLast.add(line)
         }
 
         Integer idx = 0
         for (String line : linesFromLast) {
-                idx++
+            idx++
         }
         return idx
-    }
-
-    /**
-     * Implementation of {@link org.meiskalt7.gradle.version.processors.Processor#count}
-     */
-    @Override
-    Integer count(String keyword) {
-        if (keyword?.isEmpty() || result?.log?.isEmpty()) {
-            return 0
-        }
-        return (result.log.join() =~ /(?i)(\[${keyword}\]|\(${keyword}\))/).count
     }
 
     /**
@@ -133,5 +107,4 @@ class VersionProcessor implements Processor {
         }
         result.print(targetStream)
     }
-
 }
