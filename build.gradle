@@ -10,8 +10,9 @@ plugins {
     id 'org.sonarqube' version "2.6.2"
 }
 
+archivesBaseName = "simple-gradle-versioning-plugin"
 group = 'org.meiskalt7.gradle'
-version = file('version.txt').exists() ? file('version.txt').text.trim() : "0.0.0"
+version = file('version.txt').exists() ? file('version.txt').text.trim() : "0.6.0"
 
 // Use java-gradle-plugin to generate plugin descriptors and specify plugin ids
 gradlePlugin {
@@ -36,61 +37,33 @@ pluginBundle {
     }
 }
 
-ext {
-    defaultEncoding = 'UTF-8'
+apply plugin: 'jacoco'
+apply plugin: 'groovy'
+apply plugin: 'maven'
+apply plugin: 'maven-publish'
+//apply plugin: org.meiskalt7.gradle.version.VersionPlugin
+
+
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
+
+dependencies {
+    compile gradleApi()
+    compile localGroovy()
 }
 
-allprojects {
-    repositories {
-        rootProject.buildscript.repositories.each {
-            repositories.add(it)
-        }
-    }
+/*versionGenerator {
+    debug = false
+}*/
 
-    apply plugin: 'jacoco'
+compileGroovy {
+    doLast {
+        options.compilerArgs = ['-parameters', '-Xlint:unchecked']
+    }
 }
 
-subprojects {
-    apply plugin: 'groovy'
-    apply plugin: 'maven'
-    apply plugin: 'maven-publish'
-    apply plugin: org.meiskalt7.gradle.version.VersionPlugin
-
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+task sourceGroovy(type: Jar) {
+    from sourceSets.main.groovy.srcDirs = ['src/main/groovy']
 }
 
-project(':buildSrc') {
-
-    archivesBaseName = "simple-gradle-versioning-plugin"
-    group = parent.group
-    version = parent.version
-
-    dependencies {
-        compile gradleApi()
-        compile localGroovy()
-    }
-
-    versionGenerator {
-        debug = false
-    }
-
-    compileGroovy {
-        doLast {
-            options.encoding = defaultEncoding
-            options.compilerArgs = ['-parameters', '-Xlint:unchecked']
-        }
-    }
-
-    tasks.withType(Javadoc) {
-        options.encoding = defaultEncoding
-        options.memberLevel = JavadocMemberLevel.PRIVATE
-        options.addBooleanOption("Xdoclint:all").setValue(true)
-    }
-
-    task sourceGroovy(type: Jar) {
-        from sourceSets.main.groovy.srcDirs = ['src/main/groovy']
-    }
-
-    compileGroovy.dependsOn(generateVersion)
-}
+//compileGroovy.dependsOn(generateVersion)
