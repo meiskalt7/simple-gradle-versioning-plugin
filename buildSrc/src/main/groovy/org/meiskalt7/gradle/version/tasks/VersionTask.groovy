@@ -37,13 +37,13 @@ class VersionTask {
                 extension.featureNumber = processor.parseFeatureLog(extension.featureKeywords, extension.majorKeywords)
             }
             if (extension.commitNumber == null) {
-                extension.commitNumber = processor.parseCommitLog([extension.majorKeywords, extension.featureKeywords])
+                extension.commitNumber = processor.parseCommitLog(extension.majorKeywords + extension.featureKeywords)
             }
         } else {
             extension = new VersionPluginExtension()
             extension.majorNumber = processor.parseMajorLog(extension.majorKeywords)
             extension.featureNumber = processor.parseFeatureLog(extension.featureKeywords, extension.majorKeywords)
-            extension.commitNumber = processor.parseCommitLog([extension.majorKeywords, extension.featureKeywords])
+            extension.commitNumber = processor.parseCommitLog(extension.majorKeywords + extension.featureKeywords)
         }
     }
 
